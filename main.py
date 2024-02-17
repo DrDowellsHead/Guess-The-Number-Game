@@ -16,17 +16,29 @@ class Game:
         self.help = tk.Label(text=__doc__)
 
         # Window Alignment
-        self.screen_width = window.winfo_screenwidth()
-        self.screen_height = window.winfo_screenheight()
+        width = 600
+        height = 400
 
-        self.x = (self.screen_width // 2) - (600 // 2)
-        self.y = (self.screen_height // 2) - (600 // 2)
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+
+        x = (screen_width // 2) - (600 // 2)
+        y = (screen_height // 2) - (400 // 2)
+
+        self.window.geometry(f'{width}x{height}+{x}+{y}')
 
         # Variable for random numbers
         self.number_of_digits = None
         self.random_num = None
+
         # Attempts counter
-        self.attempt = 0
+        # self.attempt = 0
+        # self.attempt = tk.Label(window, text='Attempts: 0')
+        # self.attempt.pack()
+        # self.attempt = tk.StringVar()
+        # self.attempt.set('Attempts: 0')
+        # self.attempt_label = tk.Label(window, textvariable=self.attempt)
+        # self.attempt_label.pack()
 
         # Creating text above the input field for a range of numbers for the game
         self.field_num_entry = tk.Label(window, text='Entry number of digits: ')
@@ -37,8 +49,11 @@ class Game:
         self.field_entry.pack()
 
         # Creating button for a range of numbers for the game
-        self.button_entry = tk.Button(window, text='Go!', command=self.randoms_numbers)
+        self.button_entry = tk.Button(window, text='Go!', command=lambda: (self.randoms_numbers(), self.display_input))
         self.button_entry.pack()
+
+        # self.input_text_label = tk.Label(text='')
+        # self.input_text_label.pack()
 
         # Creating text above the input field for guess
         self.field_text_guess = tk.Label(window, text='Guess the number: ')
@@ -56,12 +71,19 @@ class Game:
         self.error_text = None
 
 
+    def display_input(self):
+        user_input = self.field_entry.get()
+        self.input_text_label.congic(text=f'You entered: {user_input}')
+        self.input_text_label.pack()
+
     def randoms_numbers(self):
         """This function generate random numbers for game and increases attempt counter."""
         try:
             self.number_of_digits = int(self.field_entry.get())
             self.random_num = random.randint(0, self.number_of_digits)
-            self.attempt += 1
+
+            # self.attempt += 1
+            # self.attempt.config(text=f'Attempts: {self.attempt}')
         except ValueError:
             self.error_text = tk.Label(text='Error! Please, entry the number.')
             self.error_text.pack()
@@ -72,14 +94,24 @@ class Game:
 
         try:
             user_number = int(self.field_num_guess.get())
-            self.attempt += 1
+            # self.attempt += 1
+
+            for widget in self.window.winfo_children():
+                if isinstance(widget, tk.Label) and widget['text'] in ['Exactly! Congratulations, you guessed the number!',
+                                                                   'Oops... More than the program planned.',
+                                                                   'Unfortunately, you indicated a number less than what the program guessed...']:
+                    widget.destroy()
 
             if user_number == self.random_num:
-                message_1 = tk.Label(text='Exactly! Congratulations, you guessed the number!')
+                message = tk.Label(text='Exactly! Congratulations, you guessed the number!')
             elif user_number > self.random_num:
-                message_2 = tk.Label(text='Oops... More than the program planned.')
+                message = tk.Label(text='Oops... More than the program planned.')
             elif user_number < self.random_num:
-                message_3 = tk.Label(text='By the way, you indicated a number less than what the program guessed...')
+                message = tk.Label(text='Unfortunately, you indicated a number less than what the program guessed...')
+            message.pack()
+            # self.attempt += 1
+            # self.attempt.config(text=f'Attempts: {self.attempt}')
+
         except ValueError:
             self.error_text = tk.Label(text='Error! Please, entry the number.')
 
