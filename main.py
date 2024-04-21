@@ -30,15 +30,14 @@ class Game:
         # Variable for random numbers
         self.number_of_digits = None
         self.random_num = None
-
+        self.victory = False
         # Attempts counter
-        # self.attempt = 0
-        # self.attempt = tk.Label(window, text='Attempts: 0')
-        # self.attempt.pack()
-        # self.attempt = tk.StringVar()
-        # self.attempt.set('Attempts: 0')
-        # self.attempt_label = tk.Label(window, textvariable=self.attempt)
-        # self.attempt_label.pack()
+        self.counter = 0
+        self.attempt = tk.Label(window, text=f'Attempts: {self.counter}')
+        self.attempt.pack()
+
+        self.our_range = tk.Label(window, text='')
+        self.our_range.pack()
 
         # Creating text above the input field for a range of numbers for the game
         self.field_num_entry = tk.Label(window, text='Entry number of digits: ')
@@ -49,7 +48,8 @@ class Game:
         self.field_entry.pack()
 
         # Creating button for a range of numbers for the game
-        self.button_entry = tk.Button(window, text='Go!', command=lambda: (self.randoms_numbers(), self.display_input))
+        self.button_entry = tk.Button(window, text='Go!',
+                                      command=lambda: (self.randoms_numbers(), self.display_input()))
         self.button_entry.pack()
 
         # self.input_text_label = tk.Label(text='')
@@ -68,50 +68,62 @@ class Game:
         self.button_guess.pack()
 
         # Variable for preparation of error
-        self.error_text = None
-
+        self.error_text = tk.Label(text='')
+        self.error_text.pack()
 
     def display_input(self):
         user_input = self.field_entry.get()
-        self.input_text_label.congic(text=f'You entered: {user_input}')
-        self.input_text_label.pack()
+        try:
+            user_input = int(user_input)
+            self.our_range.config(text=f'You have selected the range from 0 to {user_input}')
+            self.our_range.pack()
+        except ValueError:
+            self.our_range.config(text="")
+            self.our_range.pack()
 
     def randoms_numbers(self):
         """This function generate random numbers for game and increases attempt counter."""
         try:
             self.number_of_digits = int(self.field_entry.get())
             self.random_num = random.randint(0, self.number_of_digits)
+            self.counter = 0
+            self.attempt.config(text=f'Attempts: {self.counter}')
 
-            # self.attempt += 1
-            # self.attempt.config(text=f'Attempts: {self.attempt}')
+            self.victory = False
+            self.error_text.destroy()
         except ValueError:
-            self.error_text = tk.Label(text='Error! Please, entry the number.')
+            self.error_text.config(text='Error! Please, entry the number.')
             self.error_text.pack()
-
 
     def check_guess(self):
         """This function get user entry and print result of guess."""
 
         try:
             user_number = int(self.field_num_guess.get())
-            # self.attempt += 1
 
             for widget in self.window.winfo_children():
-                if isinstance(widget, tk.Label) and widget['text'] in ['Exactly! Congratulations, you guessed the number!',
-                                                                   'Oops... More than the program planned.',
-                                                                   'Unfortunately, you indicated a number less than what the program guessed...']:
+                if isinstance(widget, tk.Label) and widget['text'] in [
+                    'Exactly! Congratulations, you guessed the number!',
+                    'Oops... More than the program planned.',
+                    'Unfortunately, you indicated a number less than what the program guessed...',
+                    'You have already guessed the number, please guess a new one']:
                     widget.destroy()
+            if not self.victory:
+                if user_number == self.random_num:
+                    message = tk.Label(text='Exactly! Congratulations, you guessed the number!')
+                    self.victory = True
+                elif user_number > self.random_num:
+                    message = tk.Label(text='Oops... More than the program planned.')
+                elif user_number < self.random_num:
+                    message = tk.Label(
+                        text='Unfortunately, you indicated a number less than what the program guessed...')
+                self.counter += 1
+                self.attempt.config(text=f'Attempts: {self.counter}')
+                self.attempt.pack()
+            else:
+                message = tk.Label(text='You have already guessed the number, please guess a new one')
 
-            if user_number == self.random_num:
-                message = tk.Label(text='Exactly! Congratulations, you guessed the number!')
-            elif user_number > self.random_num:
-                message = tk.Label(text='Oops... More than the program planned.')
-            elif user_number < self.random_num:
-                message = tk.Label(text='Unfortunately, you indicated a number less than what the program guessed...')
             message.pack()
-            # self.attempt += 1
-            # self.attempt.config(text=f'Attempts: {self.attempt}')
-
         except ValueError:
             self.error_text = tk.Label(text='Error! Please, entry the number.')
 
